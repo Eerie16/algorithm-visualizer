@@ -10,20 +10,20 @@ int i=0,j=0;		// To iterate through the array
 int flag=0;			// For Insertion Sort
 int dirflag=0;		// For Ripple Sort, to change direction at the ends
 int cnt=1;		// For Ripple Sort, to keep cnt of how many are sorted at the end		
-int k=0;			// To Switch from Welcome screen to Main Screen
+int screen=0;			// To Switch from Welcome screen to Main Screen
 int sorting=0;		// 1 if Sorted
 string sort_string[]={"Bubble Sort","Selection Sort","Insertion Sort","Ripple Sort"};
 int sort_count=0;	// To cycle through the string
 
 // Function to display text on screen char by char
-void bitmap_output(int x, int y, char *string, void *font)
+void bitmap_output(int x, int y, string txt , void *font)
 {
 	int len, i;
 
 	glRasterPos2f(x, y);
-	len = (int) strlen(string);
+	len = (int) txt.size();
 	for (i = 0; i < len; i++) {
-		glutBitmapCharacter(font, string[i]);
+		glutBitmapCharacter(font, txt[i]);
 	}
 }
 
@@ -62,7 +62,7 @@ void display_text()
 		bitmap_output(10, 515, "Press r to RANDOMISE",GLUT_BITMAP_9_BY_15);
 		bitmap_output(10, 495, "Esc to QUIT",GLUT_BITMAP_9_BY_15);
 		bitmap_output(10, 475, "Selected sort: ",GLUT_BITMAP_9_BY_15);
-		bitmap_output(150, 475, str_to_chr(sort_string[sort_count]),GLUT_BITMAP_9_BY_15);
+		bitmap_output(150, 475, sort_string[sort_count],GLUT_BITMAP_9_BY_15);
 	}
 	else if (sorting == 1)	// while sorting
 	{
@@ -73,7 +73,7 @@ void display_text()
 	}
 }
 
-void front()
+void homepage()
 {
 	glColor3f(0.0,0.0,1.0);
 	bitmap_output(300, 565, "WELCOME!",GLUT_BITMAP_TIMES_ROMAN_24);
@@ -138,8 +138,8 @@ void display()
 	int ix,temp;
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	if(k==0)
-		front();
+	if(screen==0)
+		homepage();
 	else{
 		display_text();
 		char text[10];
@@ -155,8 +155,8 @@ void display()
 			glEnd();
 
 			int_str(a[ix],text);
-			//printf("\n%s",text);
 			glColor3f(0,0,0);
+            //display the numbers below the bars
 			bitmap_output(12+(700/(MAX+1))*ix, 35, text,GLUT_BITMAP_TIMES_ROMAN_10);
 		}
 
@@ -342,8 +342,8 @@ void makedelay(int)
 void keyboard (unsigned char key, int x, int y)
 {
 	if(key==13)
-		k=1;
-	if (k==1 && sorting!=1)
+		screen=1;
+	if (screen==1 && sorting!=1)
 	{
 		switch (key)
 		{
@@ -353,7 +353,7 @@ void keyboard (unsigned char key, int x, int y)
 			case 'c' :	sort_count=(sort_count+1)%SORT_NO;	break;
 		}
 	}
-	if(k==1 && sorting==1)
+	if(screen==1 && sorting==1)
 		if(key=='p')	sorting=0;
 }
 
