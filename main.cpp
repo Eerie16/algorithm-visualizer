@@ -3,16 +3,16 @@
 using namespace std;
 #define SORT_NO 4	// Number of sorting algorithms
 #define MAX 50		// Number of values in the array
-#define SPEED 700	// Speed of sorting, must be greater than MAX always
+#define SPEED 500	// Speed of sorting, must be greater than MAX always
 int a[MAX];			// Array
 int swapflag=0;		// Flag to check if swapping has occured
-int i=0,j=0;		// To iterate through the array
+int i=0,j=0,pos=0;		// To iterate through the array
 int flag=0;			// For Insertion Sort
 int dirflag=0;		// For Ripple Sort, to change direction at the ends
 int cnt=1;		// For Ripple Sort, to keep cnt of how many are sorted at the end		
 int screen=0;			// To Switch from Welcome screen to Main Screen
 int sorting=0;		// 1 if Sorted
-string sort_string[]={"Bubble Sort","Selection Sort","Insertion Sort","Ripple Sort"};
+string sort_string[]={"Bubble Sort","Selection Sort","Insertion Sort","Merge Sort"};
 int sort_count=0;	// To cycle through the string
 
 // Function to display text on screen char by char
@@ -111,11 +111,12 @@ void Initialize() {
 
 	// Reset all values
 	i=j=0;
+	pos=MAX-1;
 	dirflag=0;
 	cnt=1;
 	flag=0;
 
-	glClearColor(1,1,1,1);
+	glClearColor(0,0,0,1);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluOrtho2D(0, 699,0,799);
@@ -141,6 +142,7 @@ void display()
 	if(screen==0)
 		homepage();
 	else{
+		// cout<<"sdkvkjdv\n";
 		display_text();
 		char text[10];
 		
@@ -171,6 +173,18 @@ void display()
 			glEnd();
 			swapflag=0;
 		}
+
+		if(sort_count==1)
+		{
+			glColor3f(0,1,0);
+			glBegin(GL_POLYGON);
+				glVertex2f(10+(700/(MAX+1))*i,50);
+				glVertex2f(10+(700/(MAX+1))*(i+1),50);
+				glVertex2f(10+(700/(MAX+1))*(i+1),50+a[i]*4);
+				glVertex2f(10+(700/(MAX+1))*i,50+a[i]*4);
+			glEnd();
+			swapflag=0;
+		}
 	}
 	glFlush();
 }
@@ -178,70 +192,46 @@ void display()
 // Insertion Sort
 void insertionsort()
 {
-	int temp;
-	
-	while(i<MAX)
+	while(notsorted())
 	{
-		if(flag==0){j=i; flag=1;}
-		while(j<MAX-1)
-		{
-			if(a[j]>a[j+1])
-			{
+		if(i<=MAX-1){
+			// j=i+1;
+			while(j>0 && a[j]<a[j-1]){
+				swap(a[j],a[j-1]);
+				j--;
 				swapflag=1;
-				temp=a[j];
-				a[j]=a[j+1];
-				a[j+1]=temp;
-
 				goto A;
 			}
-			j++;
-			if(j==MAX-1){flag=0;}
-			printf("swap %d and %d\n",a[j],a[j+1]);
+			i++;
+			j=i;
+			goto A;
 		}
-		i++;
 	}
 	sorting=0;
 	A:
-	i=j=0;
+	cout<<"I is "<<i<<endl;
 }
 
 // Selection Sort
 void selectionsort()
 {
-	int temp,j,min,pos;
-
-	while(notsorted())
+	if(notsorted())
 	{
-	
-		while(i<MAX-1)
+		if(j<=pos)
 		{
-			min=a[i+1];
-			pos=i+1;
-			if(i!=MAX-1)
+			swapflag=1;
+			if(a[j]>a[i])
 			{
-				for(j=i+2;j<MAX;j++)
-				{
-					if(min>a[j])
-					{
-						min=a[j];
-						pos=j;
-					}	
-				}	
+				i=j;
 			}
-			printf("\ni=%d min=%d at %d",i,min,pos);
-			printf("\nchecking %d and %d",min,a[i]);
-			if(min<a[i])
-			{
-				
-				//j=pos;
-				printf("\nswapping %d and %d",min,a[i]);
-				temp=a[pos];
-				a[pos]=a[i];
-				a[i]=temp;
-				goto A;
-			}
-			i++;
+			j++;
+			goto A;
 		}
+		swap(a[i],a[pos]);
+		i=0;
+		j=0;
+		pos--;
+		goto A;
 	}
 	sorting=0;
 	i=j=0;
@@ -262,7 +252,7 @@ void bubblesort()
 				temp=a[j];
 				a[j]=a[j+1];
 				a[j+1]=temp;
-
+				
 				goto A;
 			}
 			j++;
@@ -275,48 +265,60 @@ void bubblesort()
 }
 
 //Ripple Sort
-void ripplesort()
+
+void merge(int l,int k,int r)
 {
-	int temp;
-	while(notsorted() && sorting)
+	vector<int> v(r-l+1);
+	int idx=l,jdx=k+1,p=0;
+	while(idx<=k && jdx<=r)
 	{
-		if(dirflag==0)
+		if(a[idx]<a[jdx])
 		{
-			while(j<MAX-1)
-			{
-				if(a[j]>a[j+1])
-				{
-					swapflag=1;
-					temp=a[j];
-					a[j]=a[j+1];
-					a[j+1]=temp;
-	
-					goto A;
-				}
-				j++;
-				if(j==MAX-1) {cnt++; j=MAX-cnt;	dirflag=1-dirflag;}
-				printf("j=%d forward swap %d and %d\n",j,a[j],a[j+1]);
-			}
+			v[p]=a[idx];
+			p++;
+			idx++;
 		}
 		else
 		{
-			while(j>=0)
-			{
-				if(a[j]>a[j+1])
-				{
-					swapflag=1;
-					temp=a[j];
-					a[j]=a[j+1];
-					a[j+1]=temp;
-	
-					goto A;
-				}
-				j--;
-				if(j==0){ dirflag=1-dirflag;}
-				printf("j=%d backward swap %d and %d\n",j,a[j],a[j+1]);
-			}
+			v[p]=a[jdx];
+			p++;
+			jdx++;
+			/* code */
 		}
 	}
+	while(idx<=k)
+	{
+		v[p]=a[idx];
+		idx++;
+		p++;
+	}
+	while(jdx<=r)
+	{
+		v[p]=a[jdx];
+		jdx++;
+		p++;
+	}
+	for(idx=0;idx<r-l+1;idx++)
+		a[idx+l]=v[idx];
+
+}
+
+void sort(int l,int r)
+{
+	int mid=(l+r)/2;
+    if(l>=r)
+        return;
+	sort(l,mid);
+	sort(mid+1,r);
+	merge(l,mid,r);
+	// glutPostRedisplay();
+	display();
+}
+
+
+void mergesort()
+{
+	sort(0,MAX-1);
 	sorting=0;
 	A: printf("");
 }
@@ -331,7 +333,7 @@ void makedelay(int)
 			case 0:	bubblesort();		break;
 			case 1:	selectionsort();	break;
 			case 2: insertionsort();	break;
-			case 3: ripplesort();		break;
+			case 3: mergesort();		break;
 		}
 	}
 	glutPostRedisplay();
@@ -348,7 +350,7 @@ void keyboard (unsigned char key, int x, int y)
 		switch (key)
 		{
 			case 27	 :	exit (0); // 27 is the ascii code for the ESC key
-			case 's' :	sorting = 1; break;
+			case 's' :	sorting = 1;i=0;j=0;; break;
 			case 'r' :	Initialize(); break;
 			case 'c' :	sort_count=(sort_count+1)%SORT_NO;	break;
 		}
